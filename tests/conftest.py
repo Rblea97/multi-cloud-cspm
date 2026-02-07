@@ -9,6 +9,9 @@ from cspm.database.repository import Repository
 from cspm.rules.registry import RuleRegistry
 from cspm.scanner.engine import ScanEngine
 
+# Always load real cloud fixtures (they skip gracefully if no credentials)
+pytest_plugins = ["tests.conftest_real"]
+
 
 @pytest.fixture
 def db_repository():

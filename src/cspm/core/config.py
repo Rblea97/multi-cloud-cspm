@@ -61,6 +61,14 @@ class Settings(BaseSettings):
     alert_email_from: str = "cspm-alerts@example.com"
     alert_email_to: list[str] = []
 
+    # Test Mode Configuration (for real infrastructure testing)
+    test_mode: bool = False
+    test_aws_account_id: str | None = None
+    test_azure_subscription_id: str | None = None
+    test_resource_prefix: str = "cspm-test-"
+    test_max_scan_resources: int = 100
+    log_level: str = "INFO"
+
 
 settings = Settings()
 
