@@ -1,0 +1,81 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: cspm
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: cspm_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-dev.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-dev.txt
+
+    - name: Lint with Ruff
+      run: |
+        ruff check src/ tests/
+
+    - name: Format check with Black
+      run: |
+        black --check src/ tests/
+
+    - name: Type check with MyPy
+      run: |
+        mypy src/cspm/ --ignore-missing-imports
+
+    - name: Security scan with Bandit
+      run: |
+        bandit -r src/cspm/ -ll --skip B101,B601
+
+    - name: Run tests with coverage
+      env:
+        DATABASE_URL: postgresql://cspm:testpass@localhost:5432/cspm_test
+      run: |
+        pytest tests/ -v --cov=src/cspm --cov-report=xml --cov-report=term-missing
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+    - name: Test coverage threshold
+      run: |
+        coverage report --fail-under=80
