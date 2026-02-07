@@ -2,12 +2,11 @@
 
 import logging
 import uuid
-from typing import List, Optional
 
 from cspm.cloud.base import CloudProvider
-from cspm.database.models import Finding, Scan as ScanModel
+from cspm.database.models import Finding
+from cspm.database.models import Scan as ScanModel
 from cspm.database.repository import Repository
-from cspm.rules.base import BaseRule
 from cspm.rules.registry import RuleRegistry
 
 logger = logging.getLogger(__name__)
@@ -29,7 +28,7 @@ class ScanEngine:
         """
         self.registry = registry
         self.repository = repository
-        self._providers: List[CloudProvider] = []
+        self._providers: list[CloudProvider] = []
 
     def register_provider(self, provider: CloudProvider) -> None:
         """Register a cloud provider.
@@ -39,15 +38,15 @@ class ScanEngine:
         """
         if provider.authenticate():
             self._providers.append(provider)
-            logger.info(f"Registered cloud provider")
+            logger.info("Registered cloud provider")
         else:
-            logger.error(f"Failed to authenticate cloud provider")
+            logger.error("Failed to authenticate cloud provider")
 
     def scan(
         self,
         scan_type: str = "FULL",
-        cloud_providers: Optional[List[str]] = None,
-        resource_types: Optional[List[str]] = None,
+        cloud_providers: list[str] | None = None,
+        resource_types: list[str] | None = None,
     ) -> str:
         """Execute a security scan.
 

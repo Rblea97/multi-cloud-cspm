@@ -1,11 +1,10 @@
 """SQLAlchemy models for database schema."""
 
-from datetime import datetime
-from typing import Optional
-
-from sqlalchemy import Column, String, Integer, DateTime, Text, Boolean, Float, Enum, ForeignKey
-from sqlalchemy.orm import declarative_base, relationship
 import enum
+from datetime import datetime
+
+from sqlalchemy import Boolean, Column, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 

@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -14,10 +14,10 @@ class Resource:
     type: str  # AWS::S3::Bucket, Azure::Storage::Account, etc.
     region: str
     cloud_provider: str  # AWS or Azure
-    attributes: Dict[str, Any]  # Metadata about the resource
-    tags: Dict[str, str]
+    attributes: dict[str, Any]  # Metadata about the resource
+    tags: dict[str, str]
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "id": self.id,
@@ -46,7 +46,7 @@ class CloudProvider(ABC):
         pass
 
     @abstractmethod
-    def get_resources(self, resource_type: Optional[str] = None) -> List[Resource]:
+    def get_resources(self, resource_type: str | None = None) -> list[Resource]:
         """Get all resources, optionally filtered by type.
 
         Args:
@@ -61,7 +61,7 @@ class CloudProvider(ABC):
         pass
 
     @abstractmethod
-    def get_resource(self, resource_id: str) -> Optional[Resource]:
+    def get_resource(self, resource_id: str) -> Resource | None:
         """Get a specific resource by ID.
 
         Args:
@@ -76,7 +76,7 @@ class CloudProvider(ABC):
         pass
 
     @abstractmethod
-    def get_resource_details(self, resource_id: str, resource_type: str) -> Dict[str, Any]:
+    def get_resource_details(self, resource_id: str, resource_type: str) -> dict[str, Any]:
         """Get detailed information about a resource.
 
         Args:

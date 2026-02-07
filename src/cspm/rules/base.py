@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any
 
 from cspm.cloud.base import Resource
 
@@ -28,7 +28,7 @@ class RuleResult:
     title: str = ""
     description: str = ""
     remediation_advice: str = ""
-    evidence: Dict[str, Any] = field(default_factory=dict)
+    evidence: dict[str, Any] = field(default_factory=dict)
 
 
 class BaseRule(ABC):

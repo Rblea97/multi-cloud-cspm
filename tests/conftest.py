@@ -1,11 +1,11 @@
 """Shared test fixtures."""
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 from cspm.cloud.base import CloudProvider, Resource
 from cspm.database.repository import Repository
-from cspm.rules.base import BaseRule, RuleSeverity, RuleResult
 from cspm.rules.registry import RuleRegistry
 from cspm.scanner.engine import ScanEngine
 

@@ -1,7 +1,6 @@
 """Configuration management."""
 
 import logging
-from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -20,11 +19,11 @@ class Settings(BaseSettings):
 
     # AWS Configuration
     aws_region: str = "us-east-1"
-    aws_role_arn: Optional[str] = None
+    aws_role_arn: str | None = None
 
     # Azure Configuration
-    azure_subscription_id: Optional[str] = None
-    azure_tenant_id: Optional[str] = None
+    azure_subscription_id: str | None = None
+    azure_tenant_id: str | None = None
 
     # Database Configuration
     database_url: str = "postgresql://user:password@localhost:5432/cspm"

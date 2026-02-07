@@ -1,6 +1,5 @@
 """Tests for base rule class."""
 
-import pytest
 
 from cspm.cloud.base import Resource
 from cspm.rules.base import BaseRule, RuleResult, RuleSeverity

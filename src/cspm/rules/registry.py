@@ -1,6 +1,5 @@
 """Rule registry for managing all available rules."""
 
-from typing import Dict, List, Optional
 
 from cspm.rules.base import BaseRule
 
@@ -10,8 +9,8 @@ class RuleRegistry:
 
     def __init__(self) -> None:
         """Initialize registry."""
-        self._rules: Dict[str, BaseRule] = {}
-        self._rules_by_provider: Dict[str, List[str]] = {}
+        self._rules: dict[str, BaseRule] = {}
+        self._rules_by_provider: dict[str, list[str]] = {}
 
     def register(self, rule: BaseRule) -> None:
         """Register a rule.
@@ -26,7 +25,7 @@ class RuleRegistry:
             self._rules_by_provider[rule.cloud_provider] = []
         self._rules_by_provider[rule.cloud_provider].append(rule.rule_id)
 
-    def get_rule(self, rule_id: str) -> Optional[BaseRule]:
+    def get_rule(self, rule_id: str) -> BaseRule | None:
         """Get a rule by ID.
 
         Args:
@@ -37,7 +36,7 @@ class RuleRegistry:
         """
         return self._rules.get(rule_id)
 
-    def get_all_rules(self) -> List[BaseRule]:
+    def get_all_rules(self) -> list[BaseRule]:
         """Get all registered rules.
 
         Returns:
@@ -45,7 +44,7 @@ class RuleRegistry:
         """
         return list(self._rules.values())
 
-    def get_rules_by_provider(self, cloud_provider: str) -> List[BaseRule]:
+    def get_rules_by_provider(self, cloud_provider: str) -> list[BaseRule]:
         """Get rules for a specific cloud provider.
 
         Args:
@@ -57,7 +56,7 @@ class RuleRegistry:
         rule_ids = self._rules_by_provider.get(cloud_provider, [])
         return [self._rules[rule_id] for rule_id in rule_ids]
 
-    def get_rules_by_resource_type(self, resource_type: str) -> List[BaseRule]:
+    def get_rules_by_resource_type(self, resource_type: str) -> list[BaseRule]:
         """Get rules applicable to a resource type.
 
         Args:

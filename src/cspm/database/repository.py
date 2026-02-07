@@ -1,19 +1,25 @@
 """Data access layer using repository pattern."""
 
-from typing import List, Optional
 from datetime import datetime
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from cspm.core.config import settings
-from cspm.database.models import Base, Finding, ComplianceResult, AnomalyAlert, RemediationAction, Scan
+from cspm.database.models import (
+    AnomalyAlert,
+    Base,
+    ComplianceResult,
+    Finding,
+    RemediationAction,
+    Scan,
+)
 
 
 class Repository:
     """Repository for database operations."""
 
-    def __init__(self, db_url: Optional[str] = None):
+    def __init__(self, db_url: str | None = None):
         """Initialize repository with database connection."""
         self.db_url = db_url or settings.database_url
         self.engine = create_engine(self.db_url, echo=settings.database_echo)
@@ -43,7 +49,7 @@ class Repository:
         finally:
             session.close()
 
-    def get_finding(self, finding_id: str) -> Optional[Finding]:
+    def get_finding(self, finding_id: str) -> Finding | None:
         """Get finding by ID."""
         session = self.get_session()
         try:
@@ -51,7 +57,7 @@ class Repository:
         finally:
             session.close()
 
-    def get_findings_by_scan(self, scan_id: str) -> List[Finding]:
+    def get_findings_by_scan(self, scan_id: str) -> list[Finding]:
         """Get all findings for a scan."""
         session = self.get_session()
         try:
@@ -59,7 +65,7 @@ class Repository:
         finally:
             session.close()
 
-    def get_open_findings(self, cloud_provider: Optional[str] = None) -> List[Finding]:
+    def get_open_findings(self, cloud_provider: str | None = None) -> list[Finding]:
         """Get all open findings, optionally filtered by cloud provider."""
         session = self.get_session()
         try:
@@ -95,7 +101,7 @@ class Repository:
         finally:
             session.close()
 
-    def get_compliance_results(self, scan_id: str) -> List[ComplianceResult]:
+    def get_compliance_results(self, scan_id: str) -> list[ComplianceResult]:
         """Get compliance results for a scan."""
         session = self.get_session()
         try:
@@ -117,7 +123,7 @@ class Repository:
         finally:
             session.close()
 
-    def get_open_anomalies(self) -> List[AnomalyAlert]:
+    def get_open_anomalies(self) -> list[AnomalyAlert]:
         """Get all open anomaly alerts."""
         session = self.get_session()
         try:
@@ -139,7 +145,7 @@ class Repository:
         finally:
             session.close()
 
-    def get_remediation_action(self, action_id: str) -> Optional[RemediationAction]:
+    def get_remediation_action(self, action_id: str) -> RemediationAction | None:
         """Get remediation action by ID."""
         session = self.get_session()
         try:
@@ -161,7 +167,7 @@ class Repository:
         finally:
             session.close()
 
-    def get_scan(self, scan_id: str) -> Optional[Scan]:
+    def get_scan(self, scan_id: str) -> Scan | None:
         """Get scan by ID."""
         session = self.get_session()
         try:
