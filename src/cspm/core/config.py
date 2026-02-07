@@ -45,6 +45,22 @@ class Settings(BaseSettings):
     ml_model_retrain_interval_days: int = 7
     ml_anomaly_threshold: float = 0.8
 
+    # Alert Configuration
+    alert_enabled: bool = True
+    alert_severity_threshold: str = "HIGH"
+    alert_console_enabled: bool = True
+    alert_file_enabled: bool = True
+    alert_file_path: str = "/var/log/cspm/alerts.jsonl"
+    alert_email_enabled: bool = False
+
+    # Email Configuration (for alerts)
+    alert_email_smtp_host: str | None = None
+    alert_email_smtp_port: int = 587
+    alert_email_smtp_username: str | None = None
+    alert_email_smtp_password: str | None = None
+    alert_email_from: str = "cspm-alerts@example.com"
+    alert_email_to: list[str] = []
+
 
 settings = Settings()
 
