@@ -1,0 +1,99 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "multi-cloud-cspm"
+version = "1.0.0"
+description = "Cloud Security Posture Management with AI-Enhanced Threat Detection"
+authors = [{name = "Richard Blea", email = "rblea97@gmail.com"}]
+requires-python = ">=3.11"
+license = {text = "MIT"}
+
+dependencies = [
+    "boto3>=1.28.0",
+    "azure-identity>=1.14.0",
+    "azure-storage-blob>=12.18.0",
+    "azure-mgmt-compute>=30.7.0",
+    "azure-mgmt-sql>=3.0.0,<4.0.0",
+    "azure-mgmt-network>=23.1.0",
+    "fastapi>=0.104.1",
+    "uvicorn>=0.24.0",
+    "sqlalchemy>=2.0.0",
+    "psycopg2-binary>=2.9.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "scikit-learn>=1.3.0",
+    "pandas>=2.0.0",
+    "numpy>=1.24.0",
+    "celery>=5.3.0",
+    "redis>=5.0.0",
+    "requests>=2.31.0",
+    "python-dateutil>=2.8.0",
+    "pytz>=2023.3",
+    "cryptography>=41.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.0",
+    "pytest-asyncio>=0.21.0",
+    "moto>=4.2.0",
+    "ruff>=0.1.0",
+    "black>=23.11.0",
+    "mypy>=1.7.0",
+    "bandit>=1.7.5",
+    "types-requests>=2.31.0",
+    "types-python-dateutil>=2.8.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=src/cspm --cov-report=term-missing --cov-fail-under=80"
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+source = ["src/cspm"]
+omit = ["*/tests/*", "*/__init__.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+select = ["E", "F", "I", "N", "UP", "S"]
+ignore = ["E501"]  # Line too long (handled by black)
+
+[tool.ruff.isort]
+known-first-party = ["cspm"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+disallow_incomplete_defs = true
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+strict_optional = true
+strict_equality = true
