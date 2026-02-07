@@ -111,6 +111,37 @@ class Repository:
         finally:
             session.close()
 
+    def get_compliance_history(
+        self, framework_id: str, days: int = 30
+    ) -> list[tuple[str, datetime]]:
+        """Get compliance history for a framework.
+
+        Args:
+            framework_id: The framework ID (e.g., "CIS_AWS_1.4.0")
+            days: Number of days to look back (default 30)
+
+        Returns:
+            List of (scan_id, created_at) tuples ordered by date
+        """
+        from datetime import timedelta
+
+        session = self.get_session()
+        try:
+            cutoff_date = datetime.utcnow() - timedelta(days=days)
+            results = (
+                session.query(ComplianceResult.scan_id, ComplianceResult.created_at)
+                .filter(
+                    ComplianceResult.framework == framework_id,
+                    ComplianceResult.created_at >= cutoff_date,
+                )
+                .distinct()
+                .order_by(ComplianceResult.created_at)
+                .all()
+            )
+            return results
+        finally:
+            session.close()
+
     # Anomaly operations
     def save_anomaly_alert(self, alert: AnomalyAlert) -> AnomalyAlert:
         """Save anomaly alert."""
@@ -172,5 +203,123 @@ class Repository:
         session = self.get_session()
         try:
             return session.query(Scan).filter(Scan.id == scan_id).first()
+        finally:
+            session.close()
+
+    # Remediation operations
+
+    def create_remediation_action(
+        self,
+        finding_id: str,
+        action_type: str,
+        mode: str,
+        requested_by: str,
+        approval_required: bool,
+        status: str = "PENDING",
+    ) -> str:
+        """Create remediation action record.
+
+        Args:
+            finding_id: ID of finding
+            action_type: Type of remediation action
+            mode: Execution mode (dry_run or auto_fix)
+            requested_by: User requesting remediation
+            approval_required: Whether approval is required
+            status: Initial status
+
+        Returns:
+            ID of created remediation action
+        """
+        session = self.get_session()
+        try:
+            action = RemediationAction(
+                finding_id=finding_id,
+                action_type=action_type,
+                mode=mode,
+                status=status,
+                requested_by=requested_by,
+                approval_required=approval_required,
+            )
+            session.add(action)
+            session.commit()
+            session.refresh(action)
+            return action.id  # type: ignore[return-value]
+        finally:
+            session.close()
+
+    def get_remediation_action(self, action_id: str) -> RemediationAction | None:
+        """Get remediation action by ID.
+
+        Args:
+            action_id: ID of remediation action
+
+        Returns:
+            RemediationAction or None
+        """
+        session = self.get_session()
+        try:
+            return session.query(RemediationAction).filter(
+                RemediationAction.id == action_id
+            ).first()
+        finally:
+            session.close()
+
+    def get_pending_remediations(self, status: str) -> list[RemediationAction]:
+        """Get pending remediation actions.
+
+        Args:
+            status: Status to filter by (e.g., 'PENDING')
+
+        Returns:
+            List of remediation actions
+        """
+        session = self.get_session()
+        try:
+            return session.query(RemediationAction).filter(
+                RemediationAction.status == status
+            ).all()
+        finally:
+            session.close()
+
+    def update_remediation_status(
+        self, action_id: str, status: str, result: dict
+    ) -> None:
+        """Update remediation action status.
+
+        Args:
+            action_id: ID of remediation action
+            status: New status
+            result: Result data (JSON)
+        """
+        session = self.get_session()
+        try:
+            action = session.query(RemediationAction).filter(
+                RemediationAction.id == action_id
+            ).first()
+            if action:
+                action.status = status  # type: ignore[assignment]
+                action.result = result  # type: ignore[assignment]
+                if status == "IN_PROGRESS":
+                    action.started_at = datetime.utcnow()  # type: ignore[assignment]
+                elif status in ["SUCCESS", "FAILED"]:
+                    action.completed_at = datetime.utcnow()  # type: ignore[assignment]
+                session.commit()
+        finally:
+            session.close()
+
+    def get_remediations_by_finding(self, finding_id: str) -> list[RemediationAction]:
+        """Get all remediation actions for a finding.
+
+        Args:
+            finding_id: ID of finding
+
+        Returns:
+            List of remediation actions
+        """
+        session = self.get_session()
+        try:
+            return session.query(RemediationAction).filter(
+                RemediationAction.finding_id == finding_id
+            ).all()
         finally:
             session.close()
