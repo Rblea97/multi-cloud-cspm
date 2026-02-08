@@ -1,5 +1,6 @@
 """Unit tests for safety validators."""
 
+from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
 import pytest
@@ -7,8 +8,10 @@ import pytest
 from cspm.testing.safety import (
     SafetyError,
     is_test_resource,
+    validate_auto_stop_tag,
     validate_aws_account,
     validate_azure_subscription,
+    validate_instance_type,
     validate_resource_name,
 )
 
@@ -103,6 +106,64 @@ class TestResourceNameValidation:
             mock_settings.test_resource_prefix = "test-"
 
             validate_resource_name("test-resource-123")
+
+
+class TestInstanceTypeValidation:
+    """Tests for instance type validation."""
+
+    def test_validate_instance_type_ec2_free_tier_allowed(self):
+        """Test that t2.micro is allowed for EC2."""
+        # Should not raise
+        validate_instance_type("t2.micro", "ec2")
+
+    def test_validate_instance_type_ec2_t3_free_tier_allowed(self):
+        """Test that t3.micro is allowed for EC2."""
+        # Should not raise
+        validate_instance_type("t3.micro", "ec2")
+
+    def test_validate_instance_type_rds_free_tier_allowed(self):
+        """Test that db.t3.micro is allowed for RDS."""
+        # Should not raise
+        validate_instance_type("db.t3.micro", "rds")
+
+    def test_validate_instance_type_rds_db_t2_free_tier_allowed(self):
+        """Test that db.t2.micro is allowed for RDS."""
+        # Should not raise
+        validate_instance_type("db.t2.micro", "rds")
+
+    def test_validate_instance_type_ec2_expensive_blocked(self):
+        """Test that m5.large is blocked for EC2."""
+        with pytest.raises(SafetyError):
+            validate_instance_type("m5.large", "ec2")
+
+    def test_validate_instance_type_rds_expensive_blocked(self):
+        """Test that db.r5.large is blocked for RDS."""
+        with pytest.raises(SafetyError):
+            validate_instance_type("db.r5.large", "rds")
+
+
+class TestAutoStopTagValidation:
+    """Tests for auto-stop tag validation."""
+
+    def test_validate_auto_stop_tag_present_and_valid(self):
+        """Test that valid future timestamp passes."""
+        future_time = (datetime.now(timezone.utc) + timedelta(hours=2)).isoformat()
+        tags = [{"Key": "AutoStopAt", "Value": future_time}]
+        # Should not raise
+        validate_auto_stop_tag(tags)
+
+    def test_validate_auto_stop_tag_missing(self):
+        """Test that missing tag raises SafetyError."""
+        tags = [{"Key": "Environment", "Value": "test"}]
+        with pytest.raises(SafetyError, match="AutoStopAt"):
+            validate_auto_stop_tag(tags)
+
+    def test_validate_auto_stop_tag_past_time(self):
+        """Test that past timestamp raises SafetyError."""
+        past_time = (datetime.now(timezone.utc) - timedelta(hours=1)).isoformat()
+        tags = [{"Key": "AutoStopAt", "Value": past_time}]
+        with pytest.raises(SafetyError, match="past"):
+            validate_auto_stop_tag(tags)
 
 
 class TestIsTestResource:

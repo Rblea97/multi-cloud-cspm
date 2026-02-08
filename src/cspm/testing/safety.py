@@ -1,6 +1,7 @@
 """Safety checks for real infrastructure testing."""
 
 import logging
+from datetime import UTC, datetime
 
 from cspm.core.config import settings
 
@@ -61,8 +62,59 @@ def validate_resource_name(resource_name: str) -> None:
 def is_test_resource(resource: dict) -> bool:
     """Check if resource is tagged as a test resource."""
     tags = resource.get("tags", {})
-    return (
+    return bool(
         tags.get("Environment") == "test"
         or tags.get("ManagedBy") == "cspm-integration-tests"
         or resource.get("name", "").startswith(settings.test_resource_prefix)
     )
+
+
+FREE_TIER_EC2_TYPES = ["t2.micro", "t3.micro"]
+FREE_TIER_RDS_TYPES = ["db.t2.micro", "db.t3.micro"]
+
+
+def validate_instance_type(instance_type: str, service: str) -> None:
+    """Ensure instance type is free-tier eligible.
+
+    Args:
+        instance_type: EC2 instance type (e.g., t2.micro) or RDS type (e.g., db.t3.micro)
+        service: Cloud service type ('ec2' or 'rds')
+
+    Raises:
+        SafetyError: If instance type is not free-tier eligible
+    """
+    allowed_types = FREE_TIER_EC2_TYPES if service == "ec2" else FREE_TIER_RDS_TYPES
+
+    if instance_type not in allowed_types:
+        raise SafetyError(
+            f"Instance type '{instance_type}' is not free-tier eligible for {service}. "
+            f"Allowed types: {', '.join(allowed_types)}"
+        )
+
+
+def validate_auto_stop_tag(tags: list[dict]) -> None:
+    """Ensure compute resource has AutoStopAt tag in future.
+
+    Args:
+        tags: List of tag dicts with 'Key' and 'Value' fields
+
+    Raises:
+        SafetyError: If AutoStopAt tag is missing or set to past time
+    """
+    auto_stop_tag = None
+    for tag in tags:
+        if tag.get("Key") == "AutoStopAt":
+            auto_stop_tag = tag.get("Value")
+            break
+
+    if not auto_stop_tag:
+        raise SafetyError("AutoStopAt tag is required for compute resources")
+
+    try:
+        stop_time = datetime.fromisoformat(auto_stop_tag)
+        if stop_time < datetime.now(UTC):
+            raise SafetyError(
+                f"AutoStopAt time {auto_stop_tag} is in the past"
+            )
+    except ValueError as e:
+        raise SafetyError(f"Invalid AutoStopAt timestamp: {auto_stop_tag}") from e
