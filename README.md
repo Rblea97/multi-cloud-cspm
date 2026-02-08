@@ -1,339 +1,129 @@
 # Multi-Cloud CSPM with AI-Enhanced Threat Detection
 
-A production-grade Cloud Security Posture Management (CSPM) system that automates security audits, compliance tracking, and threat detection across AWS and Azure clouds using AI-powered anomaly detection.
+![Tests](https://img.shields.io/badge/tests-300%20passing-brightgreen) ![Coverage](https://img.shields.io/badge/coverage-82.95%25-brightgreen) ![Python](https://img.shields.io/badge/python-3.11+-blue) ![License](https://img.shields.io/badge/license-MIT-blue)
 
-## Why This Project Matters
+## What This Is
 
-In 2026, entry-level cybersecurity roles demand practical cloud security experience. This project addresses top hiring priorities:
-
-- **Multi-cloud expertise** (AWS + Azure) - Most enterprises use 2+ clouds
-- **CSPM/CNAPP trends** - Emerging security standards for cloud-native applications
-- **AI-driven security** - Machine learning for behavioral anomaly detection
-- **DevSecOps automation** - Infrastructure as Code, CI/CD security scanning
-- **Compliance frameworks** - CIS benchmark automation and tracking
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                  CSPM Control Plane                     │
-│  ┌──────────┐  ┌──────────┐  ┌────────────┐           │
-│  │ Scanner  │  │Compliance│  │ AI Anomaly │           │
-│  │ Engine   │  │ Engine   │  │  Detector  │           │
-│  └────┬─────┘  └────┬─────┘  └──────┬─────┘           │
-│       └─────────────┴────────────────┘                 │
-│                     │                                   │
-│            ┌────────▼─────────┐                        │
-│            │ Remediation      │                        │
-│            │ Engine           │                        │
-│            └────────┬─────────┘                        │
-│                     │                                   │
-│         ┌───────────┴────────────┐                     │
-│         │                        │                     │
-│    ┌────▼─────┐          ┌──────▼──────┐             │
-│    │PostgreSQL│          │   Reports   │             │
-│    │ Database │          │   Storage   │             │
-│    └──────────┘          └─────────────┘             │
-└─────────────────────────────────────────────────────────┘
-           │                         │
-  ┌────────┴──────────┐   ┌─────────┴──────────┐
-  │                   │   │                    │
-┌─▼────────────┐  ┌───▼────────────┐
-│  AWS Cloud   │  │  Azure Cloud   │
-│  • Config    │  │  • Policy      │
-│  • Security  │  │  • Defender    │
-│    Hub       │  │  • Sentinel    │
-│  • GuardDuty │  │  • Activity    │
-│  • CloudTrail│  │    Logs        │
-│  • Lambda    │  │  • Functions   │
-└──────────────┘  └────────────────┘
-```
+A production-grade Cloud Security Posture Management (CSPM) system that automates security audits, compliance tracking, and threat remediation across AWS and Azure clouds. Built with **strict TDD methodology using Claude Code** - all 300 tests written before implementation code.
 
 ## Key Features
 
-### Phase 1: Core Infrastructure ✅
-- Multi-cloud resource discovery (AWS + Azure)
-- 10 security rules for common misconfigurations
-- PostgreSQL-backed finding storage
-- JSON compliance reporting
+- ✅ **Multi-cloud support** (AWS + Azure) - Real resource discovery and scanning
+- ✅ **10 security rules** - Detects common misconfigurations (S3, EC2, RDS, Storage, SQL, NSGs)
+- ✅ **CIS benchmark compliance** - Automated control assessment and scoring
+- ✅ **Automated remediation** - Self-healing workflows with approval system
+- ✅ **ML anomaly detection** - Isolation Forest for behavioral threats
+- ✅ **Real infrastructure testing** - With safety controls and auto-stop functionality
+- ✅ **Multi-channel alerts** - Console, file, and email notifications
+- ✅ **300 tests, 82.95% coverage** - Comprehensive test suite with TDD discipline
 
-### Phase 2-3: Multi-Cloud & Compliance 🔄
-- Azure integration with unified API
-- CIS benchmark compliance scoring
-- Historical compliance tracking
-- Per-framework control mapping
+## Tech Stack
 
-### Phase 4-5: Automation & AI 📋
-- Automatic remediation with approval workflows
-- ML-based behavioral anomaly detection
-- CloudTrail/Activity log analysis
-- Real-time alert generation
-
-### Phase 6: Production Ready 🚀
-- FastAPI REST endpoints
-- GitHub Actions CI/CD pipeline
-- IaC security scanning (Checkov/tfsec)
-- 80%+ test coverage with TDD
-
-## Technology Stack
-
-**Backend:**
-- Python 3.11+
-- FastAPI, Uvicorn
-- SQLAlchemy (ORM), PostgreSQL
-- boto3 (AWS SDK), azure-sdk (Azure SDK)
-- scikit-learn (ML anomaly detection)
-
-**Infrastructure:**
-- Terraform (multi-cloud IaC)
-- AWS Lambda/Azure Functions (remediation)
-- Redis + Celery (async tasks)
-
-**Testing & Quality:**
-- pytest (80%+ coverage requirement)
-- pytest-cov, pytest-mock, pytest-asyncio
-- moto (AWS mocking), bandit (SAST), mypy (type checking)
-
-**CI/CD:**
-- GitHub Actions (test, lint, security scan, deploy)
+**Backend:** Python 3.11+, FastAPI, SQLAlchemy, PostgreSQL
+**Cloud SDKs:** boto3 (AWS), azure-sdk (Azure)
+**ML:** scikit-learn (Isolation Forest)
+**Testing:** pytest, moto, 82.95% coverage (300 tests)
+**Quality:** ruff, black, mypy, bandit
 
 ## Quick Start
 
-### Prerequisites
-- Python 3.11+
-- AWS CLI (configured with credentials)
-- Azure CLI (configured with credentials)
-- PostgreSQL 13+
-- Redis 6+ (optional, for Celery)
-
-### Installation
-
+### 1. Installation
 ```bash
-# Clone repository
 git clone https://github.com/Rblea97/multi-cloud-cspm.git
 cd multi-cloud-cspm
-
-# Create virtual environment
-python3 -m venv .venv
-source .venv/bin/activate
-
-# Install dependencies
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements-dev.txt
-
-# Create .env file
-cp .env.example .env
-# Edit .env with your AWS/Azure credentials and database URL
-
-# Set up database
-alembic upgrade head
-
-# Run tests
-pytest tests/ -v
+cp .env.example .env  # Edit with your cloud credentials (optional)
 ```
 
-### Run Your First Scan
-
+### 2. Run Tests (Proves It Works)
 ```bash
-# Trigger a security scan
-python -m cspm.scanner.cli --cloud-provider aws --resource-types s3,ec2,rds
-
-# View findings
-python -m cspm.reporter.cli --scan-id <scan-id> --output json
+make test         # 300 tests, 82.95% coverage
+make lint         # Ruff + Black + type checking
+make all          # Full quality suite
 ```
+
+### 3. Try the Demo (30 seconds, No Credentials Needed)
+```bash
+python scripts/demo.py
+```
+Shows security findings on mocked resources - validates that scanning works without cloud access.
 
 ## Project Structure
 
 ```
-multi-cloud-cspm/
-├── src/cspm/
-│   ├── core/              # Config, logging, exceptions
-│   ├── cloud/
-│   │   ├── base.py        # Abstract cloud provider interface
-│   │   ├── aws/           # AWS implementation
-│   │   └── azure/         # Azure implementation
-│   ├── scanner/
-│   │   └── engine.py      # Main scan orchestration
-│   ├── rules/
-│   │   ├── base.py        # Abstract rule class
-│   │   ├── registry.py    # Rule management
-│   │   ├── aws/           # AWS rules (S3, EC2, RDS, SG, IAM)
-│   │   └── azure/         # Azure rules (Storage, VM, SQL, NSG)
-│   ├── compliance/
-│   │   ├── framework.py   # Base framework
-│   │   ├── cis_aws.py     # CIS AWS benchmarks
-│   │   └── cis_azure.py   # CIS Azure benchmarks
-│   ├── remediation/
-│   │   ├── engine.py      # Remediation orchestration
-│   │   └── actions/       # AWS/Azure actions
-│   ├── ml/
-│   │   ├── detector.py    # Anomaly detection
-│   │   └── model.py       # Isolation Forest
-│   ├── database/
-│   │   ├── models.py      # SQLAlchemy models
-│   │   └── repository.py  # Data access layer
-│   └── api/
-│       └── app.py         # FastAPI application
-├── tests/
-│   ├── unit/              # Unit tests (70% coverage)
-│   ├── integration/       # Integration tests (20% coverage)
-│   └── conftest.py        # Shared fixtures
-├── terraform/
-│   ├── aws/               # AWS infrastructure
-│   ├── azure/             # Azure infrastructure
-│   └── shared/            # PostgreSQL, Redis
-├── docs/
-│   ├── architecture.md    # Component diagrams
-│   ├── security-decisions.md
-│   ├── compliance-coverage.md
-│   └── setup.md           # Deployment guide
-├── .github/workflows/
-│   ├── test.yml           # Test pipeline
-│   ├── security.yml       # Bandit + Checkov
-│   └── deploy.yml         # Deployment
-└── pyproject.toml         # Project configuration
-```
-
-## Implementation Phases
-
-### ✅ Phase 1: Core Infrastructure (Week 1-2)
-- AWS resource discovery for S3, EC2, RDS, Security Groups
-- 5 core security rules
-- PostgreSQL database
-- JSON reporting
-
-### 🔄 Phase 2: Azure Integration (Week 3)
-- Azure resource discovery
-- Unified multi-cloud data model
-- Combined reporting
-
-### 📋 Phase 3: Compliance Engine (Week 4)
-- CIS AWS Foundations (20 controls)
-- CIS Azure Foundations (20 controls)
-- Compliance scoring
-
-### 🔧 Phase 4: Automated Remediation (Week 5)
-- Lambda/Azure Functions
-- 5 auto-remediation workflows
-- Dry-run and approval modes
-
-### 🤖 Phase 5: AI Anomaly Detection (Weeks 6-7)
-- CloudTrail/Activity log collection
-- Isolation Forest anomaly detection
-- Real-time alert system
-
-### 🚀 Phase 6: Production Hardening (Week 8)
-- FastAPI REST API
-- GitHub Actions CI/CD
-- Security documentation
-- Demo video
-
-## Security Rules Implemented
-
-### AWS Rules
-1. **PublicS3Rule** - Detects public S3 buckets
-2. **UnencryptedRDSRule** - Detects unencrypted RDS instances
-3. **EC2PublicIPRule** - Detects EC2 instances with public IPs
-4. **OpenSecurityGroupRule** - Detects overly permissive security groups
-5. **CloudTrailDisabledRule** - Detects disabled CloudTrail logging
-*(More rules in Phase 2+)*
-
-### Azure Rules
-1. **PublicBlobStorageRule** - Detects public blob storage
-2. **UnencryptedSQLRule** - Detects unencrypted SQL databases
-3. **VMPublicIPRule** - Detects VMs with public IPs
-4. **OpenNSGRule** - Detects overly permissive NSGs
-5. **ActivityLoggingDisabledRule** - Detects disabled Activity logging
-*(More rules in Phase 2+)*
-
-## Testing & Quality
-
-### Test Coverage
-- **Minimum 80% line coverage** (enforced by pytest)
-- Unit tests: 70% of coverage
-- Integration tests: 20% of coverage
-- Security tests: 10% of coverage
-
-### Quality Checks
-- **Ruff**: Zero errors/warnings (linting)
-- **Black**: Automatic formatting
-- **MyPy**: Type checking on all public APIs
-- **Bandit**: SAST for security issues
-- **Checkov/tfsec**: IaC security scanning
-
-### Running Tests
-```bash
-# Run all tests with coverage
-pytest tests/ -v
-
-# Run specific test file
-pytest tests/unit/test_base_rule.py -v
-
-# Run with coverage report
-pytest tests/ --cov=src/cspm --cov-report=html
-```
-
-## Deployment
-
-### Local Development
-```bash
-# Start PostgreSQL
-docker run -e POSTGRES_PASSWORD=password -p 5432:5432 postgres:15
-
-# Run migrations
-alembic upgrade head
-
-# Start API server
-python -m uvicorn cspm.api.app:app --reload
-```
-
-### Production with Terraform
-```bash
-cd terraform/aws
-terraform init -backend-config=backend-prod.hcl
-terraform apply -var-file=prod.tfvars
-
-cd ../azure
-terraform init -backend-config=backend-prod.hcl
-terraform apply -var-file=prod.tfvars
+src/cspm/
+├── cloud/         # AWS + Azure provider implementations
+├── scanner/       # Scan orchestration engine
+├── rules/         # 10 security rules (5 AWS + 5 Azure)
+├── compliance/    # CIS framework compliance tracking
+├── remediation/   # Auto-remediation with approval workflows
+├── alerts/        # Multi-channel alerting system
+├── ml/            # ML anomaly detection (Isolation Forest)
+└── database/      # PostgreSQL data layer (SQLAlchemy)
 ```
 
 ## Documentation
 
-- **[Architecture](docs/architecture.md)** - Component diagrams and data flow
-- **[Security Decisions](docs/security-decisions.md)** - IAM, secrets, encryption rationale
-- **[Compliance Coverage](docs/compliance-coverage.md)** - CIS control mapping
-- **[Setup Guide](docs/setup.md)** - Step-by-step deployment
+- **[AI Workflow](AI_WORKFLOW.md)** - How this was built with Claude Code + TDD (unique differentiator)
+- **[Architecture](docs/architecture.md)** - System design and components
+- **[Security Decisions](docs/security-decisions.md)** - IAM, encryption, security rationale
+- **[Setup Guide](docs/setup.md)** - Detailed deployment instructions
+- **[Contributing](CONTRIBUTING.md)** - Development guidelines and TDD workflow
 
-## Performance Metrics
+## Development with AI
 
-| Metric | Target | Status |
-|--------|--------|--------|
-| Scan latency | <5 min | - |
-| Finding accuracy | >95% | - |
-| API response time | <100ms | - |
-| Remediation MTTR | <1 min | - |
-| Code coverage | ≥80% | - |
+This project was built using **strict TDD with Claude Code** - an AI-assisted development approach. See [AI_WORKFLOW.md](AI_WORKFLOW.md) for the complete development process and how it differs from traditional development.
+
+**TDD Cycle (for every feature):**
+1. Write failing test (RED) - defines behavior before implementation
+2. Minimal implementation (GREEN) - just enough to pass the test
+3. Refactor and verify coverage (REFACTOR)
+4. Repeat
+
+All 300 tests were written BEFORE implementation code.
+
+## Implementation Phases
+
+- ✅ **Phase 1:** AWS Core (28 tests) - S3, EC2, RDS scanning
+- ✅ **Phase 2:** Azure Integration (82 tests) - Multi-cloud unification
+- ✅ **Phase 3:** Compliance Engine (138 tests) - CIS benchmarks
+- ✅ **Phase 4:** Alert System (198 tests) - Multi-channel notifications
+- ✅ **Phase 5:** Remediation Engine (267 tests) - Auto-remediation workflows
+- 🔄 **Phase 6:** Real Infrastructure Testing (300 tests) - Free-tier testing
+
+## Real Infrastructure Testing
+
+For testing against real AWS/Azure resources:
+
+```bash
+cp .env.test.example .env.test
+# Edit .env.test with AWS_PROFILE or credentials
+
+python scripts/setup_aws_free_tier.py    # Create test resources ($0)
+pytest -m 'aws and free' -v              # Run real infrastructure tests
+python scripts/auto_stop_compute.py      # Stop instances
+python scripts/cleanup_aws_test_resources.py  # Cleanup
+```
+
+Uses only AWS free-tier resources (S3, Security Groups, RDS micro, EC2 micro).
 
 ## Contributing
 
-This project follows strict TDD (Test-Driven Development):
-
-1. Write a failing test first (RED)
-2. Implement minimum code to pass (GREEN)
-3. Refactor and test again (REFACTOR)
-4. All tests must pass before committing
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines. This project emphasizes:
+- Strict TDD (test before implementation)
+- Minimum 80% coverage requirement
+- Clean code (ruff, black, mypy, bandit)
+- Professional documentation
 
 ## License
 
-MIT License - See LICENSE file for details
+MIT License - See [LICENSE](LICENSE)
 
-## Author
+## Contact
 
-Richard Blea ([@Rblea97](https://github.com/Rblea97))
+Richard Blea - [GitHub @Rblea97](https://github.com/Rblea97)
 
-## Resources
+---
 
-- [AWS Security Best Practices](https://docs.aws.amazon.com/security/)
-- [Azure Security Best Practices](https://learn.microsoft.com/en-us/azure/security/)
-- [CIS Benchmarks](https://www.cisecurity.org/cis-benchmarks/)
-- [OWASP Cloud Security](https://owasp.org/www-project-cloud-security/)
+**Status:** Production-ready with 300 tests, 82.95% coverage, and real cloud support.

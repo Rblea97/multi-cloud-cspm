@@ -78,3 +78,46 @@ htmlcov/
 dist/
 build/
 *.egg-info/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+*.lproj/
+._*
+
+# Additional credential safety
+*.pem
+*.key
+*.ppk
+!.github/workflows/*.pem.example
+!.github/workflows/*.key.example
+.aws/
+.azure/
+.gcp/
+
+# Test artifacts and coverage
+.tox/
+.nox/
+coverage.xml
+.hypothesis/
+htmlcov/
+.coverage.*
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Ruff cache
+.ruff_cache/
+
+# Build wheels
+*.whl
+
+# Local outputs and demo artifacts
+test-results/
+scan-results/
+*.json.local
+demo_output/
+reports/
+local_scans/
